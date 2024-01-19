@@ -6,6 +6,7 @@ import Menu from './Menu';
 import Projects from './Projects';
 import Browser from './Browser';
 import template from '../template';
+import SideBar from './SideBar';
 
 
 function Desktop() {
@@ -41,27 +42,19 @@ function Desktop() {
       </div>
 
       {/* sidebar */}
-      <div className='h-full flex flex-col items-center w-[80px] fixed left-0'>
-       
-        <div className='bg-gray-900 h-full w-[80px] fixed top-[30px]  opacity-50 z-[-10]' />
-        <div className='p-1 my-2 hover:bg-neutral-700 rounded-sm duration-300'>
-        <CgMenuGridO
-        onClick={()=>setIsMenuOpen(true)}
-        role="button"
-        size={50}
-        className=''
-        color='white'
-        />
-       
-        </div>
-      </div>
+      <SideBar
+      setIsMenuOpen={setIsMenuOpen}
+      />
+      
 
       {/* main */}
       <div className='w-[calc(100vw-80px)] h-[calc(100vh-20px)] 
        ml-20 relative flex flex-wrap'>
         {
             windows.map(w=>{
-                return template[w.type] &&  React.createElement(template[w.type]?.component)
+                return template[w.type] &&  React.createElement(template[w.type]?.component,{
+                  key:w.type
+                })
             })
 
         }

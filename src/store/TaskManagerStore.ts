@@ -12,16 +12,24 @@ export interface IWindow{
 
 interface ITaskManager{
     windows:IWindow[],
+    
     activeWindow:string | null,
+    setActiveWindow:(type:WindowType)=>void
     openWindow:(data:IWindow)=>void,
     closeWindow:(data:string)=>void,
-    minimizeWindow:(data:IWindow)=>void
+    minimizeWindow:(data:IWindow)=>void,
+    
 }
 
 const useTaskManagerStore = create<ITaskManager>((set)=>({
 
     windows:[],
     activeWindow:null,
+    setActiveWindow:(type)=>set(()=>{
+        return {
+            activeWindow:type
+        }
+    }),
     openWindow:(data)=>set((state)=>{
 
        const isAlreadyOpen = state.windows.find(w=>w.type === data.type);

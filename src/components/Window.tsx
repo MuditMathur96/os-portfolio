@@ -31,12 +31,18 @@ function Window({ children,title,type}: Props) {
         y: 0
     });
 
+    const activeWindow = useTaskManagerStore(state=>state.activeWindow);
+    const closeWindow = useTaskManagerStore(state=>state.closeWindow);
+    const setActiveWindow = useTaskManagerStore(state=>state.setActiveWindow);
+    const isActive = type === activeWindow
+
     const [size,setSize] = useState<Vector2D>(defaultSize)
     const divRef = useRef<HTMLDivElement>(null);
 
     const Icon = useMemo(()=>themeTemplate[type as WindowType].icon,[]);
 
-    const closeWindow = useTaskManagerStore(state=>state.closeWindow);
+   
+    
 
     const handlePointerDown = (e: any) => {
         if (isFullScreen) return;
@@ -118,6 +124,12 @@ function Window({ children,title,type}: Props) {
         // })
     }
 
+    const handleActiveWindow = ()=>{
+        if(isActive) return;
+
+        setActiveWindow(type as WindowType)
+    }
+
     useEffect(() => {
         if (!isDragging) {
             const finalPosition = divRef.current?.getBoundingClientRect();
@@ -176,6 +188,7 @@ function Window({ children,title,type}: Props) {
 
     return (
         <div
+            onClick={handleActiveWindow}
             ref={divRef}
             style={!isFullScreen ? {
                 transform: `translateX(${position.x}px) translateY(${position.y}px)`,
@@ -184,9 +197,10 @@ function Window({ children,title,type}: Props) {
             } : {}}
             className={` min-w-[300px] min-h-[400px] rounded-sm
                          bg-white flex flex-col 
-                         ${isFullScreen ? "w-full h-full  z-[999]" : "absolute top-0 "}
+                         ${isFullScreen ? "w-full h-full" : "absolute top-0 "}
                          ${isDragging ? "opacity-70" : ""}
                          ${!isDragging && !isResizing?"duration-300":""}
+                         ${isActive?"z-[999]":""}
                          `}>
             {/* Header */}
             <div
