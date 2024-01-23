@@ -1,8 +1,11 @@
 
 import { WindowType } from "./store/TaskManagerStore";
-import Projects from "./components/Projects";
-import Browser from "./components/Browser";
+import Projects from "./components/Windows/Projects";
+import Browser from "./components/Windows/Browser";
 import { ReactNode } from "react";
+import TaskManager from "./components/Windows/TaskManager";
+import Resume from "./components/Windows/Resume";
+import ContactMe from "./components/Windows/ContactMe";
 
 interface windowList{
     component:any,
@@ -20,13 +23,21 @@ const template:{[key in WindowType]:windowList | null} ={
         title:"Browser"
     },
     TASK_MANAGER:{
-        component:null,
+        component:TaskManager,
         title:"Task Manager"
     },
     TIC_TAC_TOE:{
         component:null,
         title:"Tic Tac Toe"
     },
+    RESUME:{
+        component:Resume,
+        title:"Resume"
+    },
+    Contact_Me:{
+        component:ContactMe,
+        title:"Contact Me"
+    }
 
     
     

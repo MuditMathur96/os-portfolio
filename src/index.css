@@ -19,3 +19,13 @@ body{
   margin:0;
 
 }
+
+.ck-editor {
+  width:100% !important;
+  font-size:15px !important;
+}
+.ck.ck-content {
+  width:100% !important;
+  font-size:15px;
+  min-height: 150px !important;
+}

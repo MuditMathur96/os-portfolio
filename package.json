@@ -4,12 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^41.0.0",
+    "@ckeditor/ckeditor5-react": "^6.2.0",
+    "@emailjs/browser": "^3.12.1",
     "autoprefixer": "^10.4.17",
     "framer-motion": "^10.18.0",
     "postcss": "^8.4.33",
@@ -17,6 +20,7 @@
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
     "tailwindcss": "^3.4.1",
+    "usehooks-ts": "^2.9.5",
     "zustand": "^4.4.7"
   },
   "devDependencies": {

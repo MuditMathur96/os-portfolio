@@ -3,29 +3,41 @@ import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { FaRegWindowMaximize, FaRegWindowMinimize } from 'react-icons/fa'
 import { IoClose } from 'react-icons/io5'
 import { RxArrowBottomRight } from 'react-icons/rx'
-import useTaskManagerStore, { WindowType } from '../store/TaskManagerStore'
+import useTaskManagerStore, { IWindow, WindowType } from '../store/TaskManagerStore'
 import themeTemplate from '../themeTemplate'
+import { useMediaQuery } from 'usehooks-ts'
 
-const defaultSize:Vector2D={
-    x:600,
-    y:500
-}
+
 
 interface Vector2D {
-    x: number,
-    y: number
+    x: number | string,
+    y: number | string
 }
 type Props = {
     children:ReactNode,
     title?:string,
-    type:string
+    type:string,
+    defaultXY?:Vector2D
 }
 
-function Window({ children,title,type}: Props) {
+enum ViewState{
+    AnimationNotStarted,
+    IsAnimationInProgress,
+    IsAnimationCompleted
+}
+
+
+
+
+function Window({ children,title,type,defaultXY}: Props) {
+    const defaultSize:Vector2D={
+        x: defaultXY?.x ||600,
+        y: defaultXY?.y || 500
+    }
 
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const [isResizing,setIsResizing] = useState<boolean>(false);
-    const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
+    const [isFullScreen, setIsFullScreen] = useState<boolean>(true);
     const [position, setPosition] = useState<Vector2D>({
         x: 0,
         y: 0
@@ -34,12 +46,21 @@ function Window({ children,title,type}: Props) {
     const activeWindow = useTaskManagerStore(state=>state.activeWindow);
     const closeWindow = useTaskManagerStore(state=>state.closeWindow);
     const setActiveWindow = useTaskManagerStore(state=>state.setActiveWindow);
-    const isActive = type === activeWindow
+    const minimizeWindow = useTaskManagerStore(state=>state.minimizeWindow);
+    const isActive = type === activeWindow;
+
+    const windowProperties:IWindow | undefined = useTaskManagerStore(state=>state.windows[type as WindowType]);
 
     const [size,setSize] = useState<Vector2D>(defaultSize)
     const divRef = useRef<HTMLDivElement>(null);
 
     const Icon = useMemo(()=>themeTemplate[type as WindowType].icon,[]);
+
+    const [minimizeState,setMinimizeState] = useState<ViewState>(ViewState.AnimationNotStarted);
+    
+    
+    const isMobile = useMediaQuery("(max-width:768px)");
+    
 
    
     
@@ -54,7 +75,7 @@ function Window({ children,title,type}: Props) {
         window.addEventListener("pointerup", handlePointerUp);
     }
 
-    const handlePointerUp = (e: PointerEvent) => {
+    const handlePointerUp = () => {
         console.log("removing events")
 
         window.removeEventListener("pointermove", handlePointerMove);
@@ -90,7 +111,7 @@ function Window({ children,title,type}: Props) {
         window.addEventListener("pointerup", handlePointerResizeUp);
     }
 
-    const handlePointerResizeUp = (e: PointerEvent) => {
+    const handlePointerResizeUp = () => {
         console.log("removing events")
 
         window.removeEventListener("pointermove", handlePointerResizeMove);
@@ -188,6 +209,7 @@ function Window({ children,title,type}: Props) {
 
     return (
         <div
+        
             onClick={handleActiveWindow}
             ref={divRef}
             style={!isFullScreen ? {
@@ -196,11 +218,15 @@ function Window({ children,title,type}: Props) {
                 height:size.y
             } : {}}
             className={` min-w-[300px] min-h-[400px] rounded-sm
-                         bg-white flex flex-col 
-                         ${isFullScreen ? "w-full h-full" : "absolute top-0 "}
+                         bg-white flex flex-col absolute
+                         ${(isFullScreen || isMobile) ? "w-full h-full" : " "}
                          ${isDragging ? "opacity-70" : ""}
                          ${!isDragging && !isResizing?"duration-300":""}
-                         ${isActive?"z-[999]":""}
+                         ${isActive?"z-[99]":"z-[1]"}
+                         ${windowProperties?.isMinimized?"hidden":""}
+                         ${minimizeState === ViewState.AnimationNotStarted?"":""}
+                         ${minimizeState === ViewState.IsAnimationInProgress?"":""}
+                         ${minimizeState === ViewState.IsAnimationCompleted?"":""}
                          `}>
             {/* Header */}
             <div
@@ -221,22 +247,26 @@ function Window({ children,title,type}: Props) {
 
                         <FaRegWindowMinimize
                             role='button'
+                            onClick={()=>{
+                                minimizeWindow(type as WindowType);
+                            }}
                             color="white"
                             size={15}
                         />
                     </div>
-                    <div
+                   {!isMobile && <div
                         className='hover:bg-neutral-700 p-1 rounded-sm'
                     >
                         <FaRegWindowMaximize
                             onClick={toggleFullScreen}
                             role='button' color='white' size={15} />
-                    </div>
+                    </div>}
+
                     <div
                         className='hover:bg-neutral-700 p-1 rounded-sm'
                     >
                         <IoClose 
-                        onClick={()=>closeWindow(type)}
+                        onClick={()=>closeWindow(type as WindowType)}
                         role='button' 
                         color='white'
                          size={20} />
@@ -249,7 +279,7 @@ function Window({ children,title,type}: Props) {
             </div>
 
             {/* Main Content */}
-            <div className='flex-1'>
+            <div className='flex-1 border-2'>
                 {children}
             </div>
 
@@ -259,7 +289,7 @@ function Window({ children,title,type}: Props) {
             className=' bg-neutral-200 w-full rounded-b-sm 
                 flex justify-end 
                 cursor-nw-resize '>
-               {!isFullScreen &&   <RxArrowBottomRight />}
+               {!isFullScreen && !isMobile &&   <RxArrowBottomRight />}
 
             </div>
         </div>

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
-import useTaskManagerStore, { WindowType } from '../store/TaskManagerStore'
-import themeTemplate from '../themeTemplate'
+import useTaskManagerStore, { WindowType } from '../../store/TaskManagerStore'
+import themeTemplate from '../../themeTemplate'
+import { useMediaQuery } from 'usehooks-ts'
 
 type Props = {
     type:WindowType,
@@ -13,6 +14,7 @@ function MenuItem({type,close,title}: Props) {
   const Icon = useMemo(()=>themeTemplate[type].icon,[]);
   const OpenIcon = useMemo(()=>themeTemplate[type].open,[]);
   const openWindow = useTaskManagerStore(state=>state.openWindow);
+  const isMobile = useMediaQuery("(max-width:768px)");
 
   return (
     <div 
@@ -28,10 +30,10 @@ function MenuItem({type,close,title}: Props) {
      p-2 rounded-md 
      flex flex-col items-center justify-center
      duration-100'>
-        <Icon size={60}
+        <Icon size={isMobile?32:60}
         color='white'
         />
-    <h2 className='font-semibold text-neutral-400'>{title}</h2>
+    <h2 className='text-sm md:text-md font-semibold text-neutral-400'>{title}</h2>
     </div>
     
   )

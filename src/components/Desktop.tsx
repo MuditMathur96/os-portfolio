@@ -1,19 +1,18 @@
-import React, { ReactNode, useState } from 'react'
-import Window from './Window'
-import { CgMenuGridO } from 'react-icons/cg'
+import React, {  useState } from 'react'
+
 import useTaskManagerStore, { WindowType } from '../store/TaskManagerStore'
-import Menu from './Menu';
-import Projects from './Projects';
-import Browser from './Browser';
+import Menu from './Menu/Menu';
+
 import template from '../template';
-import SideBar from './SideBar';
+import SideBar from './SideBar/SideBar';
+import { useMediaQuery } from 'usehooks-ts';
 
 
 function Desktop() {
 
     const windows = useTaskManagerStore(state=>state.windows);
-    const openWindow = useTaskManagerStore(state=>state.openWindow);
     const [isMenuOpen,setIsMenuOpen] = useState<boolean>(false);
+    const isMobile = useMediaQuery("(max-width:768px)");
 
     
    
@@ -29,7 +28,7 @@ function Desktop() {
 
       
       {/* topbar  */}
-      <div className=' bg-neutral-800 h-[30px] z-[99] 
+     {!isMobile && <div className=' bg-neutral-800 h-[30px] z-[99] 
             flex justify-center items-center
             text-white'>
         <div className=' '> 
@@ -39,21 +38,23 @@ function Desktop() {
         
 
 
-      </div>
+      </div>}
 
       {/* sidebar */}
-      <SideBar
+      { <SideBar
       setIsMenuOpen={setIsMenuOpen}
-      />
+      />}
       
 
       {/* main */}
-      <div className='w-[calc(100vw-80px)] h-[calc(100vh-20px)] 
-       ml-20 relative flex flex-wrap'>
+      <div className={`
+      ${isMobile?" w-full h-[calc(100vh)]"
+      :"ml-20 w-[calc(100vw-80px)] h-[calc(100vh-20px)]"}
+        relative flex flex-wrap`}>
         {
-            windows.map(w=>{
-                return template[w.type] &&  React.createElement(template[w.type]?.component,{
-                  key:w.type
+            Object.keys(windows).map(w=>{
+                return template[w as WindowType] &&  React.createElement(template[w as WindowType]?.component,{
+                  key:w
                 })
             })
 

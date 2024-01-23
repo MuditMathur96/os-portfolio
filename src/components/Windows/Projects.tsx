@@ -1,5 +1,5 @@
 import React from 'react'
-import Window from './Window'
+import Window from '../Window'
 
 type Props = {}
 

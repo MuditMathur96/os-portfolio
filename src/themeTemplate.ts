@@ -2,8 +2,9 @@ import { BsBrowserEdge } from "react-icons/bs"
 import { FaFolder, FaRegFolderOpen } from "react-icons/fa";
 import { IconType } from "react-icons";
 import { WindowType } from "./store/TaskManagerStore";
-import { MdMonitorHeart } from "react-icons/md";
+import { MdEmail, MdMonitorHeart } from "react-icons/md";
 import { TbTicTac } from "react-icons/tb";
+import { RxAvatar } from "react-icons/rx";
 
 interface IIconPack{
     icon:IconType,
@@ -29,6 +30,14 @@ const themeTemplate:{[key in WindowType]:IIconPack} ={
     "TIC_TAC_TOE":{
         icon:TbTicTac,
         open:TbTicTac
+    },
+    "RESUME":{
+        icon:RxAvatar,
+        open:RxAvatar
+    },
+    "Contact_Me":{
+        icon:MdEmail,
+        open:MdEmail
     }
     
     

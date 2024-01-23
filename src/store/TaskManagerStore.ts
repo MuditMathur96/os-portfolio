@@ -1,6 +1,8 @@
 import {create} from 'zustand';
 
-export type WindowType="PROJECTS" | "BROWSER" | "TIC_TAC_TOE" | "TASK_MANAGER"
+export type WindowType="PROJECTS" | "BROWSER" | 
+                            "TIC_TAC_TOE" | "TASK_MANAGER" 
+                            | "RESUME" | "Contact_Me";
 
 export interface IWindow{
     id?:string,
@@ -11,19 +13,24 @@ export interface IWindow{
 }
 
 interface ITaskManager{
-    windows:IWindow[],
-    
+    windows:{[key in WindowType]?:IWindow},
     activeWindow:string | null,
-    setActiveWindow:(type:WindowType)=>void
+    setActiveWindow:(type:WindowType | null)=>void
     openWindow:(data:IWindow)=>void,
-    closeWindow:(data:string)=>void,
-    minimizeWindow:(data:IWindow)=>void,
+    closeWindow:(data:WindowType)=>void,
+    minimizeWindow:(data:WindowType,flag?:boolean)=>void,
     
 }
 
 const useTaskManagerStore = create<ITaskManager>((set)=>({
 
-    windows:[],
+    windows:{
+        "RESUME":{
+            isMinimized:false,
+            type:"RESUME",
+            values:{}
+        }
+    },
     activeWindow:null,
     setActiveWindow:(type)=>set(()=>{
         return {
@@ -32,40 +39,56 @@ const useTaskManagerStore = create<ITaskManager>((set)=>({
     }),
     openWindow:(data)=>set((state)=>{
 
-       const isAlreadyOpen = state.windows.find(w=>w.type === data.type);
+       const isAlreadyOpen = state.windows[data.type] !== undefined;
 
        if(isAlreadyOpen){
+           const tempState = {...state.windows};
+           tempState[data.type]!.isMinimized=false;
+           console.log("window is already open",tempState)
         return{
-            activeWindow:isAlreadyOpen.type
+
+            activeWindow:data.type,
+            windows:tempState
+
         }
        }else{
         return {
-            windows:[...state.windows,data]
+            windows:{
+                ...state.windows,[data.type]:data
+            },
+            activeWindow:data.type
         }
        }
 
     }),
     closeWindow:(data)=>{
 
-        set((state)=>({
-            windows:state.windows.filter(w=>w.type!== data)
-        }))
+        
+        set((state)=>{
+            // let tempActiveWindow = state.activeWindow;
+            // if(state.windows.length>1){
+                
+            // }
+            const temp:{[key in WindowType]?:IWindow} = {...state.windows};
+            delete temp[data as WindowType];
+            console.log("new windows",temp);
+            return{
+                windows:temp
+            }
+        })
 
     },
-    minimizeWindow:(data)=>{
+    minimizeWindow:(data,flag=true)=>{
 
         
         set((state)=>{
-            const newWindows = state.windows.map(w=>{
-                if(w.type === data.type){
-                    return {...w,isMinimized:true};
-                }else{
-                    return w;
-                }
-            });
-
+            const temp = {...state.windows};
+            if(temp[data]) 
+            temp[data]!.isMinimized =flag;
+            console.log(" new windows",temp[data]);
             return {
-                windows:newWindows
+                windows:temp,
+                activeWindow:null
             }
         })
 
