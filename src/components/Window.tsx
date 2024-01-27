@@ -10,29 +10,30 @@ import { useMediaQuery } from 'usehooks-ts'
 
 
 interface Vector2D {
-    x: number | string,
-    y: number | string
+    x: number ,
+    y: number 
 }
 type Props = {
     children:ReactNode,
     title?:string,
     type:string,
-    defaultXY?:Vector2D
+    defaultXY?:Vector2D,
+    minWidth?:number,
+    minHeight?:number
 }
 
 enum ViewState{
-    AnimationNotStarted,
-    IsAnimationInProgress,
-    IsAnimationCompleted
+    AnimationStarted,
+    AnimationCompleted
 }
 
 
 
 
-function Window({ children,title,type,defaultXY}: Props) {
+function Window({ children,title,type,defaultXY,minHeight,minWidth}: Props) {
     const defaultSize:Vector2D={
-        x: defaultXY?.x ||600,
-        y: defaultXY?.y || 500
+        x: minWidth?minWidth: defaultXY?.x ||600,
+        y: minHeight?minHeight: defaultXY?.y || 500
     }
 
     const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -42,6 +43,7 @@ function Window({ children,title,type,defaultXY}: Props) {
         x: 0,
         y: 0
     });
+    const [exitState,setExitState] = useState<ViewState>();
 
     const activeWindow = useTaskManagerStore(state=>state.activeWindow);
     const closeWindow = useTaskManagerStore(state=>state.closeWindow);
@@ -56,7 +58,7 @@ function Window({ children,title,type,defaultXY}: Props) {
 
     const Icon = useMemo(()=>themeTemplate[type as WindowType].icon,[]);
 
-    const [minimizeState,setMinimizeState] = useState<ViewState>(ViewState.AnimationNotStarted);
+    
     
     
     const isMobile = useMediaQuery("(max-width:768px)");
@@ -123,11 +125,16 @@ function Window({ children,title,type,defaultXY}: Props) {
         //console.log("inside move fn")
         //if(!isDragging ) return;
         // console.log("moving the element")
+
+
         
         setSize(prev=>{
+
+            const tempX = prev.x + e.movementX;
+            const tempY = prev.y +e.movementY;
             return{
-                x:prev.x+e.movementX ,
-                y:prev.y+e.movementY
+                x:tempX<defaultSize.x?defaultSize.x:tempX ,
+                y:tempY<defaultSize.y?defaultSize.y:tempY
             }
         })
 
@@ -149,6 +156,22 @@ function Window({ children,title,type,defaultXY}: Props) {
         if(isActive) return;
 
         setActiveWindow(type as WindowType)
+    }
+
+    const handleExit=()=>{
+            
+        setExitState(ViewState.AnimationStarted);
+        const timer = setTimeout(()=>{
+            ExitWindow();
+        },isFullScreen?150:0);
+        
+    }
+
+    const ExitWindow=()=>{
+        setExitState(ViewState.AnimationCompleted);
+        const timer = setTimeout(()=>{     
+            closeWindow(type as WindowType)
+        },150);
     }
 
     useEffect(() => {
@@ -212,21 +235,28 @@ function Window({ children,title,type,defaultXY}: Props) {
         
             onClick={handleActiveWindow}
             ref={divRef}
-            style={!isFullScreen ? {
+            style={
+                !isFullScreen ? {
                 transform: `translateX(${position.x}px) translateY(${position.y}px)`,
                 width:size.x,
                 height:size.y
-            } : {}}
-            className={` min-w-[300px] min-h-[400px] rounded-sm
+            } : {
+                minWidth:isMobile?undefined:minWidth,
+                minHeight:isMobile?undefined:minHeight
+
+            }}
+            className={` 
+                         ${minWidth?"":"md:min-w-[500px]"} 
+                         ${minHeight?"":"md:min-h-[600px]"}  rounded-sm
                          bg-white flex flex-col absolute
                          ${(isFullScreen || isMobile) ? "w-full h-full" : " "}
                          ${isDragging ? "opacity-70" : ""}
-                         ${!isDragging && !isResizing?"duration-300":""}
-                         ${isActive?"z-[99]":"z-[1]"}
+                         ${!isDragging && !isResizing?"":""}
+                         ${isActive?"z-[95]":"z-[1]"}
                          ${windowProperties?.isMinimized?"hidden":""}
-                         ${minimizeState === ViewState.AnimationNotStarted?"":""}
-                         ${minimizeState === ViewState.IsAnimationInProgress?"":""}
-                         ${minimizeState === ViewState.IsAnimationCompleted?"":""}
+                         ${exitState === ViewState.AnimationStarted?`opacity-50 md:!-skew-x-12 md:!skew-y-0 duration-300 ${isFullScreen?"!scale-50":""}`:""}
+                         ${exitState=== ViewState.AnimationCompleted?"md:!-translate-x-[100%]  !translate-y-[100%] duration-500":""}
+                        
                          `}>
             {/* Header */}
             <div
@@ -234,9 +264,9 @@ function Window({ children,title,type,defaultXY}: Props) {
                 className='h-[40px] bg-neutral-900  w-full rounded-t-sm 
                         flex items-center  justify-between'>
                 {/* Window Title */}
-                <div className='text-white px-2 flex items-center space-x-2  '>
+                <div className='text-white px-2 flex items-center space-x-2 pl-2  '>
                     {<Icon />} 
-                    <div>{title}</div>
+                    <div className='text-sm md:text-lg md:block'>{title}</div>
                 </div>
 
                 {/* Window Action Buttons */}
@@ -266,7 +296,7 @@ function Window({ children,title,type,defaultXY}: Props) {
                         className='hover:bg-neutral-700 p-1 rounded-sm'
                     >
                         <IoClose 
-                        onClick={()=>closeWindow(type as WindowType)}
+                        onClick={handleExit}
                         role='button' 
                         color='white'
                          size={20} />

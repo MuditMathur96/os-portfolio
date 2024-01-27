@@ -6,6 +6,8 @@ import Menu from './Menu/Menu';
 import template from '../template';
 import SideBar from './SideBar/SideBar';
 import { useMediaQuery } from 'usehooks-ts';
+import MobileBar from './SideBar/MobileBar';
+import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 
 
 function Desktop() {
@@ -13,6 +15,12 @@ function Desktop() {
     const windows = useTaskManagerStore(state=>state.windows);
     const [isMenuOpen,setIsMenuOpen] = useState<boolean>(false);
     const isMobile = useMediaQuery("(max-width:768px)");
+
+    const timeline = useAnimation();
+
+  async function WindowaAnimation() {
+      
+  }
 
     
    
@@ -41,7 +49,9 @@ function Desktop() {
       </div>}
 
       {/* sidebar */}
-      { <SideBar
+      {isMobile?<MobileBar
+      setIsMenuOpen={setIsMenuOpen}
+      />: <SideBar
       setIsMenuOpen={setIsMenuOpen}
       />}
       
@@ -51,14 +61,19 @@ function Desktop() {
       ${isMobile?" w-full h-[calc(100vh)]"
       :"ml-20 w-[calc(100vw-80px)] h-[calc(100vh-20px)]"}
         relative flex flex-wrap`}>
+        <AnimatePresence>
+
         {
             Object.keys(windows).map(w=>{
-                return template[w as WindowType] &&  React.createElement(template[w as WindowType]?.component,{
+                return template[w as WindowType] && React.createElement(template[w as WindowType]?.component,{
                   key:w
                 })
+                 
+                 
             })
 
         }
+        </AnimatePresence>
       </div>
 
       </div>

@@ -6,6 +6,7 @@ import { ReactNode } from "react";
 import TaskManager from "./components/Windows/TaskManager";
 import Resume from "./components/Windows/Resume";
 import ContactMe from "./components/Windows/ContactMe";
+import TicTacToe from "./components/Windows/TicTacToe";
 
 interface windowList{
     component:any,
@@ -27,7 +28,7 @@ const template:{[key in WindowType]:windowList | null} ={
         title:"Task Manager"
     },
     TIC_TAC_TOE:{
-        component:null,
+        component:TicTacToe,
         title:"Tic Tac Toe"
     },
     RESUME:{

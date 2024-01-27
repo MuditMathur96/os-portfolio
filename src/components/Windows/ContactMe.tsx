@@ -36,10 +36,15 @@ function ContactMe({}: Props) {
         if(!formRef.current) return;
         console.log(data);
         setIsSubmitted(true);
-        // await emailjs.send("service_o954uif",
-        //     "template_ljfh5sa",
-        //     data,
-        //     "TsgrrxM20LNIscPft");
+        try{
+
+            await emailjs.send(process.env.EMAILJS_SERVICE || "",
+                process.env.EMAILJS_TEMPLATE || "",
+                data,
+                process.env.EMAILJS_KEY || "");
+        }catch(e){
+            alert("Could not send the email successfully! Please try again later")
+        }   
         
     }
 

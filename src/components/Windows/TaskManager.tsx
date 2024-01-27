@@ -1,15 +1,43 @@
-import React from 'react'
 import Window from '../Window'
-import useTaskManagerStore, { WindowType } from '../../store/TaskManagerStore'
+import useTaskManagerStore, { IWindow, WindowType } from '../../store/TaskManagerStore'
+import { useEffect, useState } from 'react';
 
-type Props = {}
 const Headers:string[] =[
     "PID",
     "Task Name",
     "Memory",
 ]
 
-function TaskManager({}: Props) {
+function TaskRow ({process,index}:{process:IWindow | undefined,index:number}){
+
+    const [memory,setMemory] = useState(Math.random() * 100 + index);
+
+    useEffect(()=>{
+        
+        const timer:number = setInterval(()=>{
+            setMemory(prev=>{
+                if(prev<120){
+                    return prev + Math.random() * 50;
+                }else{
+                   return  prev - Math.random()*60;
+                }
+            });
+        },1500);
+
+        return ()=>clearTimeout(timer);
+
+    },[])
+
+
+    if(!process) return null;
+    return <div className='flex border-b py-2 pl-2'>
+    <div className='flex-1'>{index}</div>
+    <div className='flex-1'>{process?.type}</div>
+    <div className='flex-1'>{memory.toFixed(0)}</div>
+</div>
+}
+
+function TaskManager() {
 
     const windows = useTaskManagerStore(state=>state.windows);
 
@@ -17,7 +45,7 @@ function TaskManager({}: Props) {
     <Window 
     type='TASK_MANAGER'
     title='Task Manager'>
-        <div>
+        <div className='text-sm md:text-lg'>
             {/* Headers */}
             <div className='flex items-center border py-2 bg-slate-100'>
                {Headers.map((h,index)=><div 
@@ -31,11 +59,10 @@ function TaskManager({}: Props) {
             {/* Table Body*/}
             <div>
                 {Object.keys(windows).map((key,index)=>{
-                    return <div className='flex border-b py-2 pl-2'>
-                        <div className='flex-1'>{index}</div>
-                        <div className='flex-1'>{windows[key as WindowType]?.type}</div>
-                        <div className='flex-1'>{100}</div>
-                    </div>
+                    return <TaskRow
+                    key={key}
+                    index={index}
+                    process={windows[key as WindowType]} />
                 })} 
             </div>
 

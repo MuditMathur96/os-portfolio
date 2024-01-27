@@ -19,10 +19,21 @@ interface ITaskManager{
     openWindow:(data:IWindow)=>void,
     closeWindow:(data:WindowType)=>void,
     minimizeWindow:(data:WindowType,flag?:boolean)=>void,
+
+    isSidebarOpen:boolean,
+    setIsSiderBarOpen:(value:boolean)=>void
     
 }
 
 const useTaskManagerStore = create<ITaskManager>((set)=>({
+
+    isSidebarOpen:false,
+    setIsSiderBarOpen:(value)=>set(()=>{
+
+        return {
+            isSidebarOpen:value
+        }
+    }),
 
     windows:{
         "RESUME":{
