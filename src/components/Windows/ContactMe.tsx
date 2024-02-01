@@ -38,11 +38,13 @@ function ContactMe({}: Props) {
         setIsSubmitted(true);
         try{
 
-            await emailjs.send(process.env.EMAILJS_SERVICE || "",
-                process.env.EMAILJS_TEMPLATE || "",
+            await emailjs.send(import.meta.env.VITE_EMAILJS_SERVICE || "",
+                import.meta.env.VITE_EMAILJS_TEMPLATE || "",
                 data,
-                process.env.EMAILJS_KEY || "");
+                import.meta.env.VITE_EMAILJS_KEY || "");
         }catch(e){
+            console.log(e);
+            setIsSubmitted(false);
             alert("Could not send the email successfully! Please try again later")
         }   
         
